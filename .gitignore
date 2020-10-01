@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore Files
+.DS_Store
+/practice.ipynb
+
 # Distribution / packaging
 .Python
 build/
