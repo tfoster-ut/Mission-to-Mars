@@ -12,21 +12,21 @@ def scrape_all():
 
     # Run all scraping functions and save results in dictionary
     data = { 
-        data_1:{
+        data_1: {
             "news_title": news_title,
             "news_paragraph": news_paragraph,
             "featured_image": featured_image(browser),
             "facts": mars_facts(),
-            "last_modified": dt.datetime.now()}
-        data_2:{
-            "Cerberus": ce_img,
-            "Schiaparelli": sc_img,
-            "Syrtis Major": sy_img,
-            "Valles Marineris": va_img}
-    }
+            "last_modified": dt.datetime.now()},
+        data_2: {
+            {"img_url": ce_img_link, "title": ce_img_title},
+            {"img_url": sc_img_link, "title": sc_img_title},
+            {"img_url": sy_img_link, "title": sy_img_title},
+            {"img_url": va_img_link, "title": va_img_title}}
 
     # Stop webdriver and return data
     browser.quit()
+    
     return data
 
 
@@ -105,7 +105,51 @@ def mars_facts():
     return df.to_html(classes="table table-striped")
 
 def hemisphere():
-    
+    # Visit URL
+    url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(url)
+
+    # Retrieve images and titels from hemispheres
+    ce_click = browser.links.find_by_partial_text("Cerberus")
+    ce_click.click()
+
+    html = browser.html
+    ce_img = soup(html, 'html.parser')
+    ce_img_link = ce_img.find("div", class_="wide-image-wrapper")
+    ce_img_link = ce_img_link.find_all("a")[0].get("href")
+    ce_img_title = ce_img.title.get_text()
+    browser.back()
+
+    sc_click = browser.links.find_by_partial_text("Schiaparelli")
+    sc_click.click()
+
+    html = browser.html
+    sc_img = soup(html, 'html.parser')
+    sc_img_link = sc_img.find("div", class_="wide-image-wrapper")
+    sc_img_link = sc_img_link.find_all("a")[0].get("href")
+    sc_img_title = sc_img.title.get_text()
+    browser.back()
+
+    sy_click = browser.links.find_by_partial_text("Syrtis")
+    sy_click.click()
+
+    html = browser.html
+    sy_img = soup(html, 'html.parser')
+    sy_img_link = sy_img.find("div", class_="wide-image-wrapper")
+    sy_img_link = sy_img_link.find_all("a")[0].get("href")
+    sy_img_title = sy_img.title.get_text()
+    browser.back()
+
+    va_click = browser.links.find_by_partial_text("Valles")
+    va_click.click()
+
+    html = browser.html
+    va_img = soup(html, 'html.parser')
+    va_img_link = va_img.find("div", class_="wide-image-wrapper")
+    va_img_link = va_img_link.find_all("a")[0].get("href")
+    va_img_title = va_img.title.get_text()
+
+    return ce_img_link, ce_img_title, sc_img_link, sc_img_title, sy_img_link, sy_img_title, va_img_link, va_img_title
 
 if __name__ == "__main__":
     # If running as script, print scraped data
