@@ -10,6 +10,7 @@ __pycache__/
 .DS_Store
 /practice.ipynb
 /Mission_to_Mars_Challenge-Copy1.ipynb
+/.idea
 
 # Distribution / packaging
 .Python
