@@ -18,12 +18,12 @@ def scrape_all():
             "featured_image": featured_image(browser),
             "facts": mars_facts(),
             "last_modified": dt.datetime.now()},
-        data_2: {
+        data_2: [
             {"img_url": ce_img_link, "title": ce_img_title},
             {"img_url": sc_img_link, "title": sc_img_title},
             {"img_url": sy_img_link, "title": sy_img_title},
-            {"img_url": va_img_link, "title": va_img_title}}
-
+            {"img_url": va_img_link, "title": va_img_title}
+        ]
     # Stop webdriver and return data
     browser.quit()
     

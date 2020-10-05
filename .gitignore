@@ -9,6 +9,7 @@ __pycache__/
 # Ignore Files
 .DS_Store
 /practice.ipynb
+/Mission_to_Mars_Challenge-Copy1.ipynb
 
 # Distribution / packaging
 .Python
