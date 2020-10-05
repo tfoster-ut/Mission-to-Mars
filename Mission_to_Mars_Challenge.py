@@ -28,7 +28,7 @@ browser.visit(url)
 browser.is_element_not_present_by_css("ul.item_list li.slide", wait_time=3)
 
 
-# In[6]:
+# In[4]:
 
 
 # Setup HTML parser
@@ -38,14 +38,14 @@ slide_elem = news_soup.select_one('ul.item_list li.slide')
 slide_elem
 
 
-# In[7]:
+# In[5]:
 
 
 # This line of code looks inside the slide.elem and specificall identifies the "div and class"
 slide_elem.find("div", class_="content_title")
 
 
-# In[8]:
+# In[6]:
 
 
 # Use the parent element to find the first `a` tag and save it as `news_title`
@@ -53,7 +53,7 @@ news_title = slide_elem.find("div", class_="content_title").get_text()
 news_title
 
 
-# In[9]:
+# In[7]:
 
 
 # Use the parent element to find the paragraph text
@@ -63,7 +63,7 @@ news_p
 
 # ### Featured Images
 
-# In[10]:
+# In[8]:
 
 
 # Visit URL
@@ -71,7 +71,7 @@ url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
 browser.visit(url)
 
 
-# In[11]:
+# In[9]:
 
 
 # Find and click the full image button
@@ -79,7 +79,7 @@ full_image_elem = browser.find_by_id("full_image")
 full_image_elem.click()
 
 
-# In[12]:
+# In[10]:
 
 
 # Find the more info button and click that
@@ -88,7 +88,7 @@ more_info_elem = browser.links.find_by_partial_text("more info")
 more_info_elem.click()
 
 
-# In[13]:
+# In[11]:
 
 
 # Parse the resulting html with soup
@@ -96,7 +96,7 @@ html = browser.html
 img_soup = soup(html, "html.parser")
 
 
-# In[14]:
+# In[12]:
 
 
 # Find the relative image url
@@ -104,7 +104,7 @@ img_url_rel = img_soup.select_one("figure.lede a img").get("src")
 img_url_rel
 
 
-# In[15]:
+# In[13]:
 
 
 # Use the base URL to create an absolute URL
@@ -114,7 +114,7 @@ img_url
 
 # ### Mars Facts
 
-# In[16]:
+# In[14]:
 
 
 df = pd.read_html('http://space-facts.com/mars/')[0]
@@ -123,7 +123,7 @@ df.set_index('description', inplace=True)
 df
 
 
-# In[17]:
+# In[15]:
 
 
 df.to_html()
@@ -131,7 +131,7 @@ df.to_html()
 
 # ### Mars Weather
 
-# In[18]:
+# In[16]:
 
 
 # Visit the weather website
@@ -139,7 +139,7 @@ url = 'https://mars.nasa.gov/insight/weather/'
 browser.visit(url)
 
 
-# In[19]:
+# In[17]:
 
 
 # Parse the data
@@ -147,7 +147,7 @@ html = browser.html
 weather_soup = soup(html, 'html.parser')
 
 
-# In[20]:
+# In[18]:
 
 
 # Scrape the Daily Weather Report table
@@ -171,59 +171,55 @@ print(weather_table.prettify())
 # 1. Use browser to visit the URL 
 url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
 browser.visit(url)
+html = browser.html
+hemi_soup = soup(html, 'html.parser')
 
 
 # In[22]:
 
 
+# Create empty dict to hold hemisphere links
+hemispheres = {}
+
+# Lead url to append to extract
+lead_url = "https://astrogeology.usgs.gov"
+
+# Loop through url and obtain extract for each site
+for url in hemi_soup.find_all("a", class_="itemLink product-item"):
+    url = url.get("href")
+    url = lead_url + url
+    if url not in hemispheres.keys():
+        hemispheres[url]=1
+        print(url)
+
+# Convert dict to a list
+hemispheres = list(hemispheres.keys())
+
+# Confirm output
+hemispheres
+
+
+# In[23]:
+
+
 # 2. Create a list to hold the images and titles.
+length = len(hemispheres)
+hemisphere_image_urls = []
 
 # 3. Write code to retrieve the image urls and titles for each hemisphere.
-ce_click = browser.links.find_by_partial_text("Cerberus")
-ce_click.click()
-
-html = browser.html
-ce_img = soup(html, 'html.parser')
-ce_img_link = ce_img.find("div", class_="wide-image-wrapper")
-ce_img_link = ce_img_link.find_all("a")[0].get("href")
-ce_img_title = ce_img.title.get_text()
-browser.back()
-
-sc_click = browser.links.find_by_partial_text("Schiaparelli")
-sc_click.click()
-
-html = browser.html
-sc_img = soup(html, 'html.parser')
-sc_img_link = sc_img.find("div", class_="wide-image-wrapper")
-sc_img_link = sc_img_link.find_all("a")[0].get("href")
-sc_img_title = sc_img.title.get_text()
-browser.back()
-
-sy_click = browser.links.find_by_partial_text("Syrtis")
-sy_click.click()
-
-html = browser.html
-sy_img = soup(html, 'html.parser')
-sy_img_link = sy_img.find("div", class_="wide-image-wrapper")
-sy_img_link = sy_img_link.find_all("a")[0].get("href")
-sy_img_title = sy_img.title.get_text()
-browser.back()
-
-va_click = browser.links.find_by_partial_text("Valles")
-va_click.click()
-
-html = browser.html
-va_img = soup(html, 'html.parser')
-va_img_link = va_img.find("div", class_="wide-image-wrapper")
-va_img_link = va_img_link.find_all("a")[0].get("href")
-va_img_title = va_img.title.get_text()
-
-hemisphere_image_urls = [
-    {"img_url": ce_img_link, "title": ce_img_title},
-    {"img_url": sc_img_link, "title": sc_img_title},
-    {"img_url": sy_img_link, "title": sy_img_title},
-    {"img_url": va_img_link, "title": va_img_title}
-]
+for x in range(length):
+    browser.visit(hemispheres[x])
+    html = browser.html
+    html_soup = soup(html, "html.parser")
+    image_link = html_soup.find("div", class_="wide-image-wrapper")
+    image_link = image_link.find_all("a")[0].get("href")
+    title = html_soup.title.get_text()
+    # Append empty list
+    hemisphere_image_urls.append({"img_url": image_link, "title": title})
+    # Loop iterator
+    x += 1
+    # Print to verify output
+    print(title, image_link)
 
 
 # In[24]:
