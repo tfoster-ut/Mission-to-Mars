@@ -4,6 +4,7 @@ from splinter import Browser
 from bs4 import BeautifulSoup as soup
 import pandas as pd
 import datetime as dt
+import time 
 
 def scrape_all():
     # Initiate headless driver for deployment
@@ -11,19 +12,19 @@ def scrape_all():
     news_title, news_paragraph = mars_news(browser)
 
     # Run all scraping functions and save results in dictionary
-    data = {
+    mars = {
         "news_title": news_title,
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
         "last_modified": dt.datetime.now(),
-        "hemisphere_image_urls": hemisphere
+        "hemispheres": hemisphere(browser)
     }
 
     # Stop webdriver and return data
     browser.quit()
 
-    return data
+    return mars
 
 
 # # Set executable path and initialize Chrome browser
@@ -63,7 +64,7 @@ def featured_image(browser):
     # Visit URL
     url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
     browser.visit(url)
-
+    time.sleep(2)
     # Find and click the full image button
     full_image_elem = browser.find_by_id("full_image")
     full_image_elem.click()
@@ -100,13 +101,14 @@ def mars_facts():
 
     return df.to_html(classes="table table-striped")
 
-def hemisphere():
+def hemisphere(browser):
    # Create empty dict to hold hemisphere links
     hemispheres = {}
 
     # Lead url to append to extract
     lead_url = "https://astrogeology.usgs.gov"
-
+    html = browser.html
+    hemi_soup = soup(html, "html.parser")
     # Loop through url and obtain extract for each site
     for url in hemi_soup.find_all("a", class_="itemLink product-item"):
         url = url.get("href")
@@ -122,19 +124,22 @@ def hemisphere():
     hemisphere_image_urls = []
 
     # 3. Write code to retrieve the image urls and titles for each hemisphere.
-    for x in range(length):
-        browser.visit(hemispheres[x])
-        html = browser.html
-        html_soup = soup(html, "html.parser")
-        image_link = html_soup.find("div", class_="wide-image-wrapper")
-        image_link = image_link.find_all("a")[0].get("href")
-        title = html_soup.title.get_text()
-        # Append empty list
-        hemisphere_image_urls.append({"img_url": image_link, "title": title})
-        # Loop iterator
-        x += 1
-
-        return hemisphere_image_urls
+    try:
+        for x in range(length):
+            browser.visit(hemispheres[x])
+            html = browser.html
+            html_soup = soup(html, "html.parser")
+            image_link = html_soup.find("div", class_="wide-image-wrapper")
+            image_link = image_link.find_all("a")[0].get("href")
+            title = html_soup.title.get_text()
+            # Append empty list
+            hemisphere_image_urls.append({"img_url": image_link, "title": title})
+            # Loop iterator
+            x += 1
+    except AttributeError:
+        return None
+    
+    return hemisphere_image_urls
 
 if __name__ == "__main__":
     # If running as script, print scraped data
