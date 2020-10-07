@@ -8,7 +8,7 @@ import time
 
 def scrape_all():
     # Initiate headless driver for deployment
-    browser = Browser("chrome", executable_path="chromedriver", headless=True)
+    browser = Browser("chrome")
     news_title, news_paragraph = mars_news(browser)
 
     # Run all scraping functions and save results in dictionary
@@ -37,7 +37,7 @@ def mars_news(browser):
     url = 'https://mars.nasa.gov/news/'
     browser.visit(url)
     # Optional delay for loading the page
-    browser.is_element_not_present_by_css("ul.item_list li.slide", wait_time=1)
+    browser.is_element_not_present_by_css("ul.item_list li.slide", wait_time=5)
 
     # Setup HTML parser
     html = browser.html
@@ -106,38 +106,33 @@ def hemisphere(browser):
     hemispheres = {}
 
     # Lead url to append to extract
-    lead_url = "https://astrogeology.usgs.gov"
-    html = browser.html
-    hemi_soup = soup(html, "html.parser")
-    # Loop through url and obtain extract for each site
-    for url in hemi_soup.find_all("a", class_="itemLink product-item"):
-        url = url.get("href")
-        url = lead_url + url
-        if url not in hemispheres.keys():
-            hemispheres[url]=1
+    url_hemi = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(url_hemi)    
+    time.sleep(5)       
+    usgs_soup = soup(browser.html, 'html.parser')
+    headers = []
+    titles = usgs_soup.find_all('h3')  
+    time.sleep(5)
 
-    # Convert dict to a list
-    hemispheres = list(hemispheres.keys())
+    for title in titles: 
+      headers.append(title.text)
 
-    # 2. Create a list to hold the images and titles.
-    length = len(hemispheres)
-    hemisphere_image_urls = []
+    images = []
+    count = 0
+    for thumb in headers:
+        browser.find_by_css('img.thumb')[count].click()
+        images.append(browser.find_by_text('Sample')['href'])
+        browser.back()
+        count = count+1
 
-    # 3. Write code to retrieve the image urls and titles for each hemisphere.
-    try:
-        for x in range(length):
-            browser.visit(hemispheres[x])
-            html = browser.html
-            html_soup = soup(html, "html.parser")
-            image_link = html_soup.find("div", class_="wide-image-wrapper")
-            image_link = image_link.find_all("a")[0].get("href")
-            title = html_soup.title.get_text()
-            # Append empty list
-            hemisphere_image_urls.append({"img_url": image_link, "title": title})
-            # Loop iterator
-            x += 1
-    except AttributeError:
-        return None
+    hemisphere_image_urls = []  #initialize empty list to collect titles
+    counter = 0
+    for item in images:
+        hemisphere_image_urls.append({"title":headers[counter],"img_url":images[counter]})
+        counter = counter+1
+    # closeBrowser(browser)
+    browser.back()
+    time.sleep(1)
     
     return hemisphere_image_urls
 
