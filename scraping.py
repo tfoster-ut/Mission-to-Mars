@@ -8,7 +8,7 @@ import time
 
 def scrape_all():
     # Initiate headless driver for deployment
-    browser = Browser("chrome")
+    browser = Browser("chrome", headless=True)
     news_title, news_paragraph = mars_news(browser)
 
     # Run all scraping functions and save results in dictionary
